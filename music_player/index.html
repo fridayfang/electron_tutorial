@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的播放器</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+    .play-bar-bg {
+      background-color: #e9ecef;
+      height: 1px;
+    }
+    .play-bar {
+      background-color: #007bff;
+      height: 1px;
+      width: 10%;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container my-5">
+    <h1 class="mb-4">播放器</h1>
+    
+    <button type="button" class="btn btn-primary btn-lg btn-block mb-4" id="add-song-to-player">添加歌曲到播放器</button>
+    
+    <div class="list-group">
+      <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        Rock Roll Train
+        <span>
+          <i class="fas fa-play mr-3"></i>
+          <i class="fas fa-trash"></i>
+        </span>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        Rock Roll Train
+        <span>
+          <i class="fas fa-play mr-3"></i>
+          <i class="fas fa-trash"></i>
+        </span>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        A New Track
+        <span>
+          <i class="fas fa-play mr-3"></i>
+          <i class="fas fa-trash"></i>
+        </span>
+      </a>
+    </div>
+    
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <span>正在播放： A New Track</span>
+      <span>00:10 / 03:25</span>
+    </div>
+    
+    <div class="play-bar-bg">
+      <div class="play-bar"></div>
+    </div>
+    <div class="mt-2 progress-text">10%</div>
+  </div>
+  
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script>
+    // 接收新的音乐轨道并更新列表
+    window.electronAPI.receive('add-track', (track) => {
+      const listGroup = document.querySelector('.list-group');
+      const newTrackElement = document.createElement('a');
+      newTrackElement.href = '#';
+      newTrackElement.classList.add('list-group-item', 'list-group-item-action', 'd-flex', 'justify-content-between', 'align-items-center');
+      
+      // 分割路径，提取文件名
+      const trackNameWithExtension = track.split('/').pop();
+      
+      // 去除文件扩展名，得到纯文件名
+      const trackName = trackNameWithExtension.split('.')[0];
+      newTrackElement.textContent = trackName; // 假设 track 是音乐轨道的名称
+      console.log("track name ", track)
+
+      // 创建包含图标的 span 元素
+      const iconsSpan = document.createElement('span');
+
+      // 创建播放图标
+      const playIcon = document.createElement('i');
+      playIcon.classList.add('fas', 'fa-play', 'mr-3');
+      iconsSpan.appendChild(playIcon);
+
+      // 创建删除图标
+      const trashIcon = document.createElement('i');
+      trashIcon.classList.add('fas', 'fa-trash');
+      iconsSpan.appendChild(trashIcon);
+
+      // 将 iconsSpan 添加到 newTrackElement
+      newTrackElement.appendChild(iconsSpan);
+
+      listGroup.appendChild(newTrackElement);
+    });
+
+    const addSongButton = document.querySelector('#add-song-to-player'); // 假设您的按钮有这个ID
+  
+    addSongButton.addEventListener('click', () => {
+      console.log('add song to player will opne a new window');
+      window.electronAPI.showAddSongWindow();
+    });
+
+    let currentTrack = { name: null, audio: null, isPlaying: false };
+
+    
+
+    document.addEventListener('click', (event) => {
+
+      function playOrPauseTrack() {
+      if (currentTrack.audio) {
+        if (currentTrack.audio.paused) {
+          currentTrack.audio.play();
+          console.log("playOrPauseTrack play");
+          // 更新图标等UI元素
+          currentTrack.isPlaying = true;
+          event.target.classList.remove('fa-play');
+          event.target.classList.add('fa-pause');
+        } else {
+          currentTrack.audio.pause();
+          console.log("playOrPauseTrack pause");
+          // 更新图标等UI元素
+          currentTrack.isPlaying = false;
+          event.target.classList.remove('fa-pause');
+          event.target.classList.add('fa-play');
+        }
+      }
+    }
+
+  if (event.target.matches('.fa-play') || event.target.matches('.fa-pause')) {
+    const trackElement = event.target.closest('.list-group-item');
+    const trackName = Array.from(trackElement.childNodes).find(node => node.nodeType === Node.TEXT_NODE).textContent.trim();
+
+    // 检查是否是新的音乐轨道或首次播放
+    if (!currentTrack.audio || currentTrack.name !== trackName) {
+      if (currentTrack.audio && currentTrack.isPlaying) {
+        currentTrack.audio.pause();
+      }
+      window.electronAPI.getTrackPath(trackName).then((trackPath) => {
+        currentTrack = { name: trackName, audio: new Audio(trackPath), isPlaying: false };
+        console.log("new track ready")
+        setupAudioPlayer();
+        console.log("new track play")
+        playOrPauseTrack();
+      });
+    } else {
+      playOrPauseTrack();
+    }
+  }
+});
+
+function setupAudioPlayer() {
+  // 设置音乐播放进度更新逻辑
+  currentTrack.audio.ontimeupdate = () => {
+    const progress = (currentTrack.audio.currentTime / currentTrack.audio.duration) * 100;
+    const playBar = document.querySelector('.play-bar');
+    const progressText = document.querySelector('.mt-2');
+    playBar.style.width = progress + '%';
+    progressText.textContent = progress.toFixed(0) + '%';
+  };
+}
+
+
+// document.addEventListener('click', (event) => {
+//   if (event.target.matches('.fa-play') || event.target.matches('.fa-pause')) {
+//     const trackElement = event.target.closest('.list-group-item');
+//     const trackName = Array.from(trackElement.childNodes).find(node => node.nodeType === Node.TEXT_NODE).textContent.trim();
+    
+//     if (currentTrack.name === trackName && currentTrack.audio) {
+//       // 切换当前音乐的播放状态
+//       if (currentTrack.isPlaying) {
+//         currentTrack.audio.pause(); // 暂停音乐
+//         event.target.classList.remove('fa-pause');
+//         event.target.classList.add('fa-play');
+//       } else {
+//         currentTrack.audio.play(); // 播放音乐
+//         event.target.classList.remove('fa-play');
+//         event.target.classList.add('fa-pause');
+//       }
+//       currentTrack.isPlaying = !currentTrack.isPlaying;
+//     } else {
+//       // 播放新选中的音乐
+//       if (currentTrack.audio && currentTrack.isPlaying) {
+//         currentTrack.audio.pause(); // 停止当前音乐
+//         const currentPlayingIcon = trackElement.parentNode.querySelector('.fa-pause');
+//         if (currentPlayingIcon) {
+//           currentPlayingIcon.classList.remove('fa-pause');
+//           currentPlayingIcon.classList.add('fa-play');
+//         }
+//       }
+//       window.electronAPI.getTrackPath(trackName).then((trackPath) => {
+//         currentTrack = { name: trackName, audio: new Audio(trackPath), isPlaying: true };
+//         currentTrack.audio.play();
+//         event.target.classList.remove('fa-play');
+//         event.target.classList.add('fa-pause');
+//       });
+//     }
+
+//     if (currentTrack.audio) {
+//       // 播放进度更新逻辑
+//       currentTrack.audio.ontimeupdate = () => {
+//         const progress = (currentTrack.audio.currentTime / currentTrack.audio.duration) * 100;
+//         const playBar = document.querySelector('.play-bar');
+//         playBar.style.width = progress + '%';
+//         const progressText = document.querySelector('.progress-text'); // 假设这是显示百分比的元素
+
+//         playBar.style.width = progress + '%';
+//         progressText.textContent = progress.toFixed(0) + '%'; // 更新百分比文本
+//       };
+//     }
+//   }
+// });
+
+
+
+
+  //   document.addEventListener('click', (event) => {
+  //   if (event.target.matches('.fa-play')) {
+  //     console.log('play button clicked');
+  //     // 获取音乐名称
+  //     const trackElement = event.target.closest('.list-group-item')
+  //     const trackName = Array.from(trackElement.childNodes).find(node => node.nodeType === Node.TEXT_NODE).textContent.trim();
+  //     console.log('播放音乐:', trackName);
+  //     // 发送IPC消息到主进程，请求音乐路径
+  //     window.electronAPI.getTrackPath(trackName).then((trackPath) => {
+  //       // 播放音乐
+  //       const audio = new Audio(trackPath);
+  //       audio.play();
+  //       // 更新播放进度条
+  //     });
+  //   }
+  // });
+  </script>
+  
+  
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>添加歌曲</title>
+  <!-- 引入 Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">添加歌曲</h1>
+    <div class="d-flex justify-content-center mb-2">
+      <button id="import-music" class="btn btn-primary mr-2">导入音乐</button>
+      <button id="close-window" class="btn btn-secondary">关闭</button>
+    </div>
+  </div>
+
+  <script>
+    const importMusicButton = document.getElementById('import-music');
+    importMusicButton.addEventListener('click', () => {
+      window.electronAPI.openFileDialog().then(filePaths => {
+        console.log("filePaths: ", filePaths);
+        if (filePaths) {
+          // 发送音乐轨道信息到主窗口
+          window.electronAPI.sendTrackToMainWindow(filePaths);
+          // 关闭添加歌曲窗口
+          window.close();
+        }
+      });
+    });
+
+    const closeButton = document.getElementById('close-window');
+    closeButton.addEventListener('click', () => {
+      window.close(); // 关闭当前窗口
+    });
+  </script>
+</body>
+</html>

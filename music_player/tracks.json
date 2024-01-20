@@ -1,0 +1,14 @@
+[
+  {
+    "name": "water_star",
+    "path": "/Users/fangshuai03/Desktop/electron_tutorial/music_player/musics/water_star.mp3"
+  },
+  {
+    "name": "expect_snow",
+    "path": "/Users/fangshuai03/Desktop/electron_tutorial/music_player/musics/expect_snow.mp3"
+  },
+  {
+    "name": "summer_wind",
+    "path": "/Users/fangshuai03/Desktop/electron_tutorial/music_player/musics/summer_wind.mp3"
+  }
+]
