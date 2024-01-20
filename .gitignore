@@ -1,0 +1,53 @@
+# 依赖项 #
+############
+node_modules/
+bower_components/
+
+# 日志和数据库 #
+################
+*.log
+*.sql
+*.sqlite
+
+# 操作系统产生的文件 #
+#####################
+.DS_Store # MacOS 文件系统
+Thumbs.db # Windows 文件系统
+ehthumbs.db
+Desktop.ini
+
+# 编辑器目录和文件 #
+###################
+.vscode/ # VSCode
+.idea/ # IntelliJ
+*.sublime-workspace
+*.sublime-project
+
+# 构建输出 #
+############
+/dist
+/tmp
+/out
+/build
+/release
+
+# 调试文件 #
+############
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+# 其他 #
+########
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 特定于 Electron-builder 的 #
+###############################
+*.pem
+*.prov
+*.p12
+*.mobileprovision

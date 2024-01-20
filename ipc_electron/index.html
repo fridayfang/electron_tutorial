@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>渲染进程1</title>
+    <!-- 使用 BootCDN 的 Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        #text-content {
+            resize: vertical;
+            min-height: 150px;
+        }
+        #image-container {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 20px;
+            text-align: center;
+            max-height: 400px;
+            overflow: auto;
+        }
+        #image-display {
+            max-height: 100%;
+            max-width: 100%;
+            margin: auto;
+        }
+        .hidden {
+            display: none;
+        }
+        .btn:hover {
+            background-color: #3a05e8; /* 指定悬浮时的背景色 */
+            color: rgb(251, 251, 253); /* 指定悬浮时的字体颜色 */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col-12">
+                <button id="open-file" class="btn btn-primary mb-2">选择文本文件</button>
+                <button id="open-image" class="btn btn-primary mb-2">选择图片文件</button>
+                <textarea id="text-content" class="form-control"></textarea>
+            </div>
+            <div class="col-12">
+                <div id="image-container" class="hidden">
+                    <img id="image-display" alt="Selected Image" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 部分 -->
+
+    <!-- 使用 BootCDN 的 jQuery 和 Popper.js -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/popper.js/2.0.6/umd/popper.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        document.getElementById('open-file').addEventListener('click', () => {
+            ipcRenderer.send('open-file-dialog');
+        });
+
+        ipcRenderer.on('file-read-reply', (event, data) => {
+            document.getElementById('text-content').value = data;
+        });
+
+        document.getElementById('open-image').addEventListener('click', () => {
+            ipcRenderer.send('open-image-dialog');
+        });
+
+        ipcRenderer.on('image-read-reply', (event, data) => {
+            console.log("get image data")
+            const imageContainer = document.getElementById('image-container');
+            const imageDisplay = document.getElementById('image-display');
+            imageDisplay.src = data;
+            imageContainer.classList.remove('hidden'); // 当图片加载后，显示图片容器
+        });
+    </script>
+</body>
+</html>
