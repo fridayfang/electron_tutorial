@@ -53,8 +53,8 @@
     </div>
     
     <div class="d-flex justify-content-between align-items-center mb-1">
-      <span>正在播放： A New Track</span>
-      <span>00:10 / 03:25</span>
+      <span id="current-playing">正在播放： A New Track</span>
+      <span id="current-time">00:10 / 03:25</span>
     </div>
     
     <div class="play-bar-bg">
@@ -148,6 +148,8 @@
         console.log("new track ready")
         setupAudioPlayer();
         console.log("new track play")
+        const playingElement = document.getElementById('current-playing');
+        playingElement.textContent = '正在播放： ' + trackName;
         playOrPauseTrack();
       });
     } else {
@@ -157,8 +159,17 @@
 });
 
 function setupAudioPlayer() {
+  function formatTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const secondsLeft = Math.floor(seconds - minutes * 60);
+  return minutes.toString().padStart(2, '0') + ':' + secondsLeft.toString().padStart(2, '0');
+}
   // 设置音乐播放进度更新逻辑
   currentTrack.audio.ontimeupdate = () => {
+    const timeElement = document.getElementById('current-time');
+    const currentTime = formatTime(currentTrack.audio.currentTime);
+    const duration = formatTime(currentTrack.audio.duration);
+    timeElement.textContent = currentTime + ' / ' + duration;
     const progress = (currentTrack.audio.currentTime / currentTrack.audio.duration) * 100;
     const playBar = document.querySelector('.play-bar');
     const progressText = document.querySelector('.mt-2');

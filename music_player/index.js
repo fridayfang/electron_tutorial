@@ -47,7 +47,8 @@ function loadTracks() {
 
 app.on('window-all-closed', function () {
   console.log('window-all-closed');
-  if (process.platform !== 'darwin') app.quit();
+  app.quit();
+  // if (process.platform !== 'darwin') app.quit();
 });
 
 ipcMain.handle('open-file-dialog', async (event) => {
