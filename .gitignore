@@ -51,3 +51,6 @@ yarn-debug.log
 *.prov
 *.p12
 *.mobileprovision
+
+dist/
+.DS_Store
