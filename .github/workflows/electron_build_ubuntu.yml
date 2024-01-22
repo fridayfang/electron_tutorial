@@ -1,0 +1,38 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out Git repository
+      uses: actions/checkout@v2
+
+    - name: Install Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+
+    - name: Install Dependencies
+      run: |
+        cd music_player
+        npm install
+
+    - name: Build for Linux
+      run: |
+        cd music_player
+        npm run dist
+
+    - name: Upload Release Assets for Linux
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          music_player/dist/*.deb
+          music_player/dist/*.AppImage
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}

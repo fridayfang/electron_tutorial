@@ -127,7 +127,7 @@ function saveTracks(newTrack) {
       tracks.push(newTrack);
     }
   }
-
+  console.log("add tracks to file ", newTrack)
   // 将更新后的数据写回tracks.json
   fs.writeFileSync(tracksFilePath, JSON.stringify(tracks, null, 2));
 }
